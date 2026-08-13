@@ -1,65 +1,708 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { creators, responses } from "@/app/data/articles";
 
 export default function Home() {
+  const [articles, setArticles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchArticles() {
+      try {
+        const res = await fetch("/api/articles");
+        const data = await res.json();
+        setArticles(data);
+      } catch (error) {
+        console.error("Error fetching articles:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchArticles();
+  }, []);
+
+  if (loading) {
+    return (
+      <main>
+        <div className="loading-spinner">Loading articles...</div>
+      </main>
+    );
+  }
+
+  // Filter articles from database
+  const featuredArticle = articles.find((a: any) => a.isFeatured === true);
+  const worldNews = articles.slice(0, 2);
+  const topStories = articles.slice(2, 10);
+  const economyArticles = articles.filter(
+    (a: any) => a.category?.name === "Economy",
+  );
+  const technologyArticles = articles.filter(
+    (a: any) => a.category?.name === "Technology",
+  );
+  const scienceArticles = articles.filter(
+    (a: any) => a.category?.name === "Science & Health",
+  );
+  const lifestyleArticles = articles.filter(
+    (a: any) => a.category?.name === "Lifestyle",
+  );
+  const sportsArticles = articles.filter(
+    (a: any) => a.category?.name === "Sports",
+  );
+  const globalMarketArticles = articles.filter(
+    (a: any) => a.category?.name === "Global Market",
+  );
+  const otherArticles = articles.filter(
+    (a: any) => a.category?.name === "Other",
+  );
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main>
+      <header className="header">
+        <div className="top-bar">
+          <span className="date">July 16, 2026</span>
+          <span className="volume">Vol. 127, No. 43,891 $3.50</span>
+        </div>
+
+        <div className="header-main">
+          <div className="company-name">PressPoint</div>
+
+          <nav className="nav-menu">
+            <a href="#" className="dropdown-link">
+              All Pages <span className="dropdown-arrow">▾</span>
+            </a>
+
+            <Link href="/about">About</Link>
+            <Link href="/subscription">Subscription</Link>
+            <Link href="/authors">Authors</Link>
+            <Link href="/contact">Contact</Link>
+          </nav>
+
+          <div className="header-actions">
+            <div className="cart-icon">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.1 15.9 4.5 17 5.4 17H17M17 17C15.9 17 15 17.9 15 19C15 20.1 15.9 21 17 21C18.1 21 19 20.1 19 19C19 17.9 18.1 17 17 17ZM9 19C9 20.1 8.1 21 7 21C5.9 21 5 20.1 5 19C5 17.9 5.9 17 7 17C8.1 17 9 17.9 9 19Z"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="cart-badge">0</span>
+            </div>
+            <button className="subscribe-btn">Subscribe</button>
+          </div>
+        </div>
+      </header>
+
+      <div className="pink">
+        <div className="ticker">
+          <span className="ticker-item">
+            Breaking News: Global markets react to new economic policies
+          </span>
+          <span className="ticker-dot">•</span>
+          <span className="ticker-item">
+            Elections 2025: Early polls show unexpected shifts
+          </span>
+          <span className="ticker-dot">•</span>
+          <span className="ticker-item">
+            President announces major education policy overhauls
+          </span>
+        </div>
+      </div>
+
+      <div className="Main">
+        <div className="left-column">
+          {/* ===== FEATURED STORY ===== */}
+          {featuredArticle && (
+            <div className="featured-section">
+              <div className="image-container">
+                <img
+                  className="image"
+                  src={featuredArticle.imageUrl || "/placeholder-image.jpg"}
+                  alt={featuredArticle.title || "Featured article"}
+                />
+                <div className="image-overlay">
+                  <span className="overlay-tag">
+                    {featuredArticle.category?.name || "Featured"}
+                  </span>
+                  <p className="overlay-description">
+                    {featuredArticle.excerpt || ""}
+                  </p>
+                </div>
+              </div>
+              <p className="global-title">{featuredArticle.title || ""}</p>
+              <p className="para">{featuredArticle.content || ""}</p>
+            </div>
+          )}
+
+          {/* ===== WORLD NEWS ===== */}
+          <h2 className="section-title">World News</h2>
+
+          <div className="news-row">
+            {worldNews.map((article: any) => (
+              <div key={article.id} className="news-item">
+                <div className="news-image-wrapper">
+                  <img
+                    src={article.imageUrl || "/placeholder-image.jpg"}
+                    alt={article.title || "Article"}
+                    className="news-thumbnail"
+                  />
+                </div>
+                <div className="news-content">
+                  <div className="news-meta">
+                    <span className="author">
+                      {article.author?.name || "Unknown"}
+                    </span>
+                    <span className="news-date">
+                      {article.createdAt
+                        ? new Date(article.createdAt).toLocaleDateString()
+                        : "Date unknown"}
+                    </span>
+                  </div>
+                  <p className="news-title">{article.title || ""}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ===== TOP GLOBAL STORIES ===== */}
+        <div className="right-column">
+          <div className="stories-header">
+            <h2 className="section-title">Top Global Stories</h2>
+            <Link href="/top-stories" className="see-all">
+              See All →
+            </Link>
+          </div>
+
+          {topStories.map((story: any) => (
+            <div key={story.id} className="story-card">
+              <div className="story-image-wrapper">
+                <img
+                  src={story.imageUrl || "/placeholder-image.jpg"}
+                  alt={story.category?.name || "Story"}
+                  className="story-image"
+                />
+              </div>
+              <div className="story-info">
+                <div className="story-meta">
+                  <span className="story-category">
+                    {story.category?.name || "General"}
+                  </span>
+                  <span className="story-dot">•</span>
+                  <span className="story-date">
+                    {story.createdAt
+                      ? new Date(story.createdAt).toLocaleDateString()
+                      : "Date unknown"}
+                  </span>
+                </div>
+                <h3 className="story-title">{story.title || ""}</h3>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ===== ECONOMY SECTION ===== */}
+      <section className="economy-section">
+        <div className="economy-grid">
+          <div className="economy-left">
+            <div className="economy-header">
+              <h2 className="section-title">Economy</h2>
+              <Link href="economy" className="see-all">
+                See All →
+              </Link>
+            </div>
+
+            <div className="economy-cards-row">
+              {economyArticles.slice(0, 2).map((card: any) => (
+                <div key={card.id} className="economy-card">
+                  <div className="economy-card-image-wrapper">
+                    <img
+                      src={card.imageUrl || "/placeholder-image.jpg"}
+                      alt={card.title || "Economy"}
+                      className="economy-card-image"
+                    />
+                  </div>
+                  <span className="economy-category">
+                    {card.category?.name || "Economy"}
+                  </span>
+                  <p className="economy-date">
+                    {card.createdAt
+                      ? new Date(card.createdAt).toLocaleDateString()
+                      : "Date unknown"}
+                  </p>
+                  <p className="economy-title">{card.title || ""}</p>
+                </div>
+              ))}
+            </div>
+
+            {economyArticles.slice(2, 3).map((card: any) => (
+              <div key={card.id} className="economy-item">
+                <div className="economy-item-image-wrapper">
+                  <img
+                    src={card.imageUrl || "/placeholder-image.jpg"}
+                    alt={card.title || "Economy"}
+                    className="economy-item-image"
+                  />
+                </div>
+                <div className="economy-item-content">
+                  <span className="economy-category">
+                    {card.category?.name || "Economy"}
+                  </span>
+                  <p className="economy-date">
+                    {card.createdAt
+                      ? new Date(card.createdAt).toLocaleDateString()
+                      : "Date unknown"}
+                  </p>
+                  <p className="economy-title">{card.title || ""}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="economy-right">
+            <div className="economy-header">
+              <h2 className="section-title">Technology</h2>
+              <Link href="technology" className="see-all">
+                See All →
+              </Link>
+            </div>
+
+            {technologyArticles.slice(0, 1).map((article: any) => (
+              <div key={article.id} className="tech-featured">
+                <img
+                  src={article.imageUrl || "/placeholder-image.jpg"}
+                  alt={article.title || "Technology"}
+                  className="tech-featured-image"
+                />
+                <span className="tech-tag">AI TECH</span>
+                <div className="tech-featured-overlay">
+                  <p className="tech-featured-description">
+                    {article.excerpt || ""}
+                  </p>
+                  <div className="tech-featured-meta">
+                    <span className="tech-author">
+                      {article.author?.name || "Unknown"}
+                    </span>
+                    <span className="tech-date">
+                      {article.createdAt
+                        ? new Date(article.createdAt).toLocaleDateString()
+                        : "Date unknown"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {technologyArticles.slice(1, 2).map((article: any) => (
+              <div key={article.id} className="economy-item">
+                <div className="economy-item-image-wrapper">
+                  <img
+                    src={article.imageUrl || "/placeholder-image.jpg"}
+                    alt={article.title || "Technology"}
+                    className="economy-item-image"
+                  />
+                </div>
+                <div className="economy-item-content">
+                  <div className="economy-author">
+                    {article.author?.name || "Unknown"} |{" "}
+                    {article.createdAt
+                      ? new Date(article.createdAt).toLocaleDateString()
+                      : "Date unknown"}
+                  </div>
+                  <p className="economy-title">{article.title || ""}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="updates">
+        <div className="data">
+          <h1 className="real">
+            Follow us for real-time updates and breaking stories from around the
+            world.
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+          <p className="para">
+            Stay informed wherever you are — join our growing community of
+            readers and followers across social platforms.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="logo">
+          <img
+            className="logoo"
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRM9mfLqALokkPMHIlDG8mCIYlgp-Fu8WjQVrdkqOaimg&s=10"
+            alt="social"
+          />
         </div>
-      </main>
-    </div>
+      </div>
+
+      {/* ===== SCIENCE & HEALTH ===== */}
+      <section className="sci-health">
+        <div className="sci-health-header">
+          <span className="header-square"></span>
+          <h2 className="sci-health-title">Science & Health</h2>
+          <span className="header-line"></span>
+          <Link href="science" className="see-all-red">
+            See All →
+          </Link>
+        </div>
+
+        <div className="cards">
+          {scienceArticles.slice(0, 4).map((card: any) => (
+            <div key={card.id} className="card">
+              <img
+                src={card.imageUrl || "/placeholder-image.jpg"}
+                alt={card.title || "Science"}
+                className="card-image"
+              />
+              <span className="card-tag">
+                {card.category?.name || "Science"}
+              </span>
+              <p className="card-meta">
+                {card.category?.name || "Science"}{" "}
+                <span className="meta-dot">•</span>{" "}
+                {card.createdAt
+                  ? new Date(card.createdAt).toLocaleDateString()
+                  : "Date unknown"}
+              </p>
+              <p className="card-desc">{card.title || ""}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ===== SPORTS ===== */}
+      <section className="sports-section">
+        <div className="sports-header">
+          <h2 className="sports-title">Sports and Entertainment</h2>
+          <span className="sports-line"></span>
+        </div>
+
+        <div className="sports-grid-top">
+          {sportsArticles.slice(0, 2).map((item: any) => (
+            <div key={item.id} className="sports-feature">
+              <img
+                src={item.imageUrl || "/placeholder-image.jpg"}
+                alt={item.title || "Sports"}
+                className="sports-feature-image"
+              />
+              <span className="sports-tag">
+                {item.category?.name || "Sports"}
+              </span>
+              <div className="sports-feature-overlay">
+                <p>{item.title || ""}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="sports-grid-bottom">
+          {sportsArticles.slice(2, 5).map((card: any) => (
+            <div key={card.id} className="sports-card">
+              <img
+                src={card.imageUrl || "/placeholder-image.jpg"}
+                alt={card.title || "Sports"}
+                className="sports-card-image"
+              />
+              <p className="sports-card-desc">{card.title || ""}</p>
+              <p className="sports-card-meta">
+                {card.category?.name || "Sports"} |{" "}
+                {card.createdAt
+                  ? new Date(card.createdAt).toLocaleDateString()
+                  : "Date unknown"}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ===== TOP CREATORS ===== */}
+      <div className="containerr">
+        <div className="headeer">
+          <div className="headingWrapper">
+            <div className="redBox"></div>
+            <h1 className="creators">Top creators</h1>
+          </div>
+          <Link href="authors" className="seeAll">
+            See All →
+          </Link>
+        </div>
+      </div>
+
+      <div className="list">
+        {creators.map((creator) => (
+          <div key={creator.id} className="first">
+            <img className="creat" src={creator.imageUrl} alt={creator.name} />
+            <div className="text">
+              <h2 className="name">{creator.name}</h2>
+              <p className="dess">{creator.company}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ===== LIFESTYLE ===== */}
+      <div className="containerr">
+        <div className="headeer">
+          <div className="headingWrapper">
+            <div className="redBox"></div>
+            <h1 className="creators">lifestyle & Culture</h1>
+          </div>
+          <Link href="lifestyle" className="seeAll">
+            See All →
+          </Link>
+        </div>
+      </div>
+
+      <section className="lifestyle">
+        {lifestyleArticles.slice(0, 4).map((item: any) => (
+          <div key={item.id} className="life">
+            <img
+              className="lif"
+              src={item.imageUrl || "/placeholder-image.jpg"}
+              alt={item.title || "Lifestyle"}
+            />
+            <p className="hi">
+              {item.category?.name || "Lifestyle"}{" "}
+              {item.createdAt
+                ? new Date(item.createdAt).toLocaleDateString()
+                : "Date unknown"}
+            </p>
+            <h1 className="by">{item.title || ""}</h1>
+          </div>
+        ))}
+      </section>
+
+      {/* ===== GLOBAL MARKET ===== */}
+      <div className="containerr">
+        <div className="headeer">
+          <div className="headingWrapper">
+            <div className="redBox"></div>
+            <h1 className="creators">Economy/Global Markets</h1>
+          </div>
+          <Link href="global" className="seeAll">
+            See All →
+          </Link>
+        </div>
+      </div>
+
+      {globalMarketArticles.slice(0, 1).map((item: any) => (
+        <section key={item.id} className="economy">
+          <div className="leftpic">
+            <img
+              className="htt"
+              src={item.imageUrl || "/placeholder-image.jpg"}
+              alt="global market"
+            />
+          </div>
+          <div className="descrip">
+            <p className="market">
+              #Markets |{" "}
+              {item.createdAt
+                ? new Date(item.createdAt).toLocaleDateString()
+                : "Date unknown"}
+            </p>
+            <h2 className="asia">{item.title || ""}</h2>
+            <p className="oil">{item.excerpt || ""}</p>
+            <button className="but">Read Full Story</button>
+          </div>
+        </section>
+      ))}
+
+      {/* ===== RESPONSES ===== */}
+      <section className="responses">
+        {responses.map((item) => (
+          <div key={item.id} className="response">
+            <h2 className="hh">{item.title}</h2>
+            <p className="get">{item.description}</p>
+            <div className="creator-info">
+              <img
+                className="small-avatar"
+                src={item.imageUrl}
+                alt={item.author}
+              />
+              <span className="creator-name-small">{item.author}</span>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      <img
+        className="clas"
+        src="https://cdn.prod.website-files.com/692401e8be8549a781fdbb92/692401e8be8549a781fdbcb8_Frame%202147228801.webp"
+        alt="image"
+      />
+      <div className="blu">
+        <h1 className="nam">Join 1M+ Readers </h1>
+        <h1 className="nam">who never miss a headline. </h1>
+
+        <p className="namm">
+          Stay informed wherever you are — join our growing community
+        </p>
+        <p className="namm">
+          of readers and followers across social platforms.
+        </p>
+        <button className="buton">Subscribe</button>
+      </div>
+
+      {/* ===== OTHER NEWS ===== */}
+      <div className="containerr">
+        <div className="headeer">
+          <div className="headingWrapper">
+            <div className="redBox"></div>
+            <h1 className="creators">Other News</h1>
+          </div>
+          <Link href="news" className="seeAll">
+            See All →
+          </Link>
+        </div>
+      </div>
+
+      <section className="other">
+        {otherArticles.slice(0, 3).map((item: any) => (
+          <div key={item.id} className="oth">
+            <img
+              className="sr"
+              src={item.imageUrl || "/placeholder-image.jpg"}
+              alt={item.title || "News"}
+            />
+            <p className="add">
+              {item.author?.name || "Unknown"}{" "}
+              {item.createdAt
+                ? new Date(item.createdAt).toLocaleDateString()
+                : "Date unknown"}
+            </p>
+            <h3 className="james">{item.title || ""}</h3>
+            <p className="add">{item.tags || ""}</p>
+          </div>
+        ))}
+      </section>
+
+      <div className="pin">
+        <p>
+          Elections 2025 : Early polls show unexpected shifts. President
+          announces that major education policy overhauls. Breaking: Global
+          markets react to new economic policies.
+        </p>
+      </div>
+
+      {/* ===== FOOTER ===== */}
+      <footer>
+        <section className="foot">
+          <div className="rigg">
+            <h1 className="heaadi">Subscribe to Our Newsletter to Stay</h1>
+            <h1 className="heaadi"> ahead with daily headlines.</h1>
+          </div>
+          <div className="leff">
+            <input
+              className="emai"
+              type="email"
+              placeholder="Enter your Email"
+              required
+            />
+            <button className="email">Subscribe</button>
+          </div>
+        </section>
+
+        <section className="bfot">
+          <div className="bfo">
+            <h1 className="pres">PressPoint</h1>
+            <p className="leade">
+              World leaders gathered in Geneva to discuss urgent
+            </p>
+            <p className="leade">
+              actions for global warming, pledging new commitments.
+            </p>
+          </div>
+          <div className="links">
+            <p className="page">Pages</p>
+            <a className="hre" href="#">
+              Home
+            </a>
+            <a className="hre" href="#">
+              About Us
+            </a>
+            <a className="hre" href="#">
+              Authors
+            </a>
+            <a className="hre" href="#">
+              Subsciption
+            </a>
+          </div>
+          <div className="links">
+            <p className="page">Pages</p>
+            <a className="hre" href="#">
+              Contact Us
+            </a>
+            <a className="hre" href="#">
+              Change Log
+            </a>
+            <a className="hre" href="#">
+              License
+            </a>
+            <a className="hre" href="#">
+              404 Error
+            </a>
+          </div>
+          <div className="links">
+            <p className="page">Contact Us</p>
+            <p className="office">
+              Head Office: 123 PressPoint, New York, USA.
+            </p>
+            <p className="office">Phone: +1 (000) 123-4567</p>
+            <p className="office">Email: contact@presspoint.com</p>
+          </div>
+        </section>
+
+        <section className="icon">
+          <p className="foll">Follow us on :</p>
+          <div className="socials">
+            <a className="soci" href="#">
+              <img
+                src="https://cdn.prod.website-files.com/692401e8be8549a781fdbb92/692401e8be8549a781fdbcbb_Social%20icons%20(3).svg"
+                alt="twitter"
+              />
+            </a>
+            <a className="soci" href="#">
+              <img
+                src="https://cdn.prod.website-files.com/692401e8be8549a781fdbb92/692401e8be8549a781fdbcbd_Social%20icons%20(4).svg"
+                alt="facebook"
+              />
+            </a>
+            <a className="soci" href="#">
+              <img
+                src="https://cdn.prod.website-files.com/692401e8be8549a781fdbb92/692401e8be8549a781fdbcbc_instagram%201%20(1).svg"
+                alt="insta"
+              />
+            </a>
+            <a className="soci" href="#">
+              <img
+                src="https://cdn.prod.website-files.com/692401e8be8549a781fdbb92/692401e8be8549a781fdbcba_Social%20icons%20(5).svg"
+                alt="linkedin"
+              />
+            </a>
+          </div>
+        </section>
+
+        <div className="lastt">
+          <p className="point">
+            © 2025 PressPoint. All Rights Reserved.Powered by Webflow
+          </p>
+        </div>
+      </footer>
+    </main>
   );
 }
